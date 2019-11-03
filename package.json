@@ -1,0 +1,27 @@
+{
+  "name": "quickshot",
+  "version": "1.0.0",
+  "description": "A screenshot tool",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "./node_modules/.bin/electron-rebuild"
+  },
+  "repository": "https://github.com/electron/electron-quick-start",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "5.0.12",
+    "electron-rebuild": "^1.8.6"
+  },
+  "dependencies": {
+    "sharp": "^0.23.2"
+  }
+}
