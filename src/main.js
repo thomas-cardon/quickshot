@@ -22,6 +22,7 @@ function createScreenshotWindow(width, height) {
     kiosk: true,
     x: 0,
     y: 0,
+    thickFrame: false,
     webPreferences: {
       nodeIntegration: true,
       experimentalFeatures: true
@@ -32,6 +33,7 @@ function createScreenshotWindow(width, height) {
 
   // Emitted when the window is closed.
   takeScreenshotWindow.on('closed', function () {
+    console.log('Screenshot window closed');
     takeScreenshotWindow = null
   });
 }
@@ -61,22 +63,24 @@ function createSettingsWindow(width, height) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
-  //createWindow(width, height);
-
   globalShortcut.register('PrintScreen', () => {
+    const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+
     console.log('PrintScreen key pressed!');
     if (takeScreenshotWindow === null) createScreenshotWindow(width, height);
+    else takeScreenshotWindow.show();
   });
 
   globalShortcut.register('CommandOrControl+PrintScreen', () => {
     console.log('Settings key pressed!');
-    if (takeScreenshotWindow === null) createSettingsWindow();
+    if (settingsWindow === null) createSettingsWindow();
+    else settingsWindow.show();
   });
 });
 
 app.on('activate', function () {
   if (takeScreenshotWindow === null) createScreenshotWindow();
+  else takeScreenshotWindow.show();
 });
 
 app.on('window-all-closed', e => e.preventDefault());
