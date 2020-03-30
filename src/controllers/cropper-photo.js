@@ -6,15 +6,14 @@ const { desktopCapturer } = require('electron');
 /**
  * Create a screenshot of the entire screen using the desktopCapturer module of Electron.
  *
- * @param callback {Function} callback receives as first parameter the base64 string of the image
  * @param imageFormat {String} Format of the image to generate ('image/jpeg' or 'image/png')
  **/
-function fullscreenScreenshot(callback, imageFormat) {
-    var _this = this;
-    this.callback = callback;
+
+function fullscreenScreenshot(imageFormat) {
+  return new Promise((resolve, reject) => {
     imageFormat = imageFormat || 'image/jpeg';
 
-    this.handleStream = (stream) => {
+    function handleStream(stream) {
         // Create hidden video tag
         var video = document.createElement('video');
         video.style.cssText = 'position:absolute;top:-10000px;left:-10000px;';
@@ -28,19 +27,23 @@ function fullscreenScreenshot(callback, imageFormat) {
             video.play();
 
             // Create canvas
-            var canvas = document.createElement('canvas');
+            global.canvas = document.createElement('canvas');
+
             canvas.width = this.videoWidth;
             canvas.height = this.videoHeight;
-            var ctx = canvas.getContext('2d');
+
+            canvas.style.position = 'absolute';
+            canvas.style.overflow = 'hidden';
+
+            canvas.style.top = '0px';
+            canvas.style.left = '0px';
+
+            canvas.style.filter = 'brightness(30%)';
+
+            global.ctx = canvas.getContext('2d');
+
             // Draw video on canvas
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            if (_this.callback) {
-                // Save screenshot to base64
-                _this.callback(canvas.toDataURL(imageFormat));
-            } else {
-                console.log('Need callback!');
-            }
 
             // Remove hidden video tag
             video.remove();
@@ -48,14 +51,12 @@ function fullscreenScreenshot(callback, imageFormat) {
                 // Destroy connect to stream
                 stream.getTracks()[0].stop();
             } catch (e) {}
+
+            resolve(canvas);
         }
 
         video.srcObject = stream;
         document.body.appendChild(video);
-    };
-
-    this.handleError = function(e) {
-        console.log(e);
     };
 
     desktopCapturer.getSources({ types: ['window', 'screen'] }).then(async sources => {
@@ -64,7 +65,7 @@ function fullscreenScreenshot(callback, imageFormat) {
         for (const source of sources) {
             // Filter: main screen
             if ((source.name === "Entire screen") || (source.name === "Screen 1") || (source.name === "Screen 2")) {
-                try{
+                try {
                     const stream = await navigator.mediaDevices.getUserMedia({
                         audio: false,
                         video: {
@@ -79,11 +80,12 @@ function fullscreenScreenshot(callback, imageFormat) {
                         }
                     });
 
-                    _this.handleStream(stream);
+                    return handleStream(stream);
                 } catch (e) {
-                    _this.handleError(e);
+                    reject(e);
                 }
             }
         }
-    });
+    }).catch(reject);
+  });
 }

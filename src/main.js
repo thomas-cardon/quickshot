@@ -7,11 +7,12 @@ const path = require('path')
 let takeScreenshotWindow = null, settingsWindow = null;
 const dev = process.argv.includes('--dev');
 
-function createScreenshotWindow(width, height) {
+function createScreenshotWindow(width, height, mode = 'photo') {
   // Create the browser window.
   takeScreenshotWindow = new BrowserWindow({
     width,
     height,
+    show: false,
     frame: false,
     resizable: false,
     movable: false,
@@ -29,20 +30,22 @@ function createScreenshotWindow(width, height) {
     }
   });
 
-  takeScreenshotWindow.loadFile(path.join(__dirname, '/views/', 'cropper.html'));
+  takeScreenshotWindow.loadFile(path.join(__dirname, '/views/', 'cropper-' + mode + '.html'));
 
-  // Emitted when the window is closed.
-  takeScreenshotWindow.on('closed', function () {
-    console.log('Screenshot window closed');
-    takeScreenshotWindow = null
+  takeScreenshotWindow.once('ready-to-show', () => takeScreenshotWindow.show());
+
+  takeScreenshotWindow.on('show', () => {
+    console.log('>> Screenshot window is now shown. Capturing source');
+
+    takeScreenshotWindow.webContents.executeJavaScript("fullscreenScreenshot('image/png').then(() => select(canvas, 'image/png', true));", true);
   });
 }
 
 function createSettingsWindow(width, height) {
   // Create the browser window.
   settingsWindow = new BrowserWindow({
-    width: 400,
-    height: 800,
+    width: 500,
+    height: 700,
     frame: false,
     resizable: false,
     transparent: true,
@@ -63,23 +66,27 @@ function createSettingsWindow(width, height) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+  console.log('>> Ready');
+
   globalShortcut.register('PrintScreen', () => {
     const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
 
-    console.log('PrintScreen key pressed!');
+    console.log('>> PrintScreen key pressed!');
     if (takeScreenshotWindow === null) createScreenshotWindow(width, height);
     else takeScreenshotWindow.show();
   });
 
   globalShortcut.register('CommandOrControl+PrintScreen', () => {
-    console.log('Settings key pressed!');
+    console.log('>> Settings key pressed!');
     if (settingsWindow === null) createSettingsWindow();
     else settingsWindow.show();
   });
 });
 
 app.on('activate', function () {
-  if (takeScreenshotWindow === null) createScreenshotWindow();
+  const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+
+  if (takeScreenshotWindow === null) createScreenshotWindow(width, height);
   else takeScreenshotWindow.show();
 });
 
