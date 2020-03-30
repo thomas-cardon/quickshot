@@ -4,12 +4,33 @@
         <meta charset="utf-8">
         <title>Quickshot Cropper</title>
         <link rel="stylesheet" type="text/css" href="../assets/semantic/semantic.min.css">
+        <link rel="stylesheet" type="text/css" href="../assets/animate.css">
     </head>
     <body style="margin: 0;width: 100%;height: 100%; display: none;">
-        <div class="ui three buttons" id="tools" style="position: absolute; display: none; top: 0; left: 0; width: 15%; z-index: 1500;">
-          <button class="ui button" onclick="Tools.pencil.toggle()"><i class="pencil alternate icon"></i></button>
-          <button class="ui button" onclick="save()"><i class="copy icon"></i></button>
-          <button class="ui button"><i class="save icon"></i></button>
+        <div id="tools" style="position: absolute; display: none; top: 0; left: 0; z-index: 1500;">
+          <div class="ui icon buttons" style="display: inline-block;">
+            <button class="ui button" onclick="Tools.pencil.toggle(this)"><i class="pencil alternate icon"></i></button>
+            <button class="ui button" onclick="Tools.text.toggle(this)"><i class="font icon"></i></button>
+            <button class="ui button" onclick="Tools.crop(this)"><i class="crop icon"></i></button>
+            <button class="ui button" onclick="save()"><i class="copy icon"></i></button>
+            <button class="ui button"><i class="save icon"></i></button>
+          </div>
+          <div class="ui icon animated fadeInRight faster text-options" style="display: none;">
+              <div class="ui button" id="text-color-btn" onclick="this.children[0].click();" disabled=true>
+                <input type="color" id="text-color" value="#fdffff" style="display: none;" onchange="console.log(this.value)">
+                <!-- onchange="Tools.text.options.color = document.getElementById('text-color-btn').value = document.getElementById('text-color').value;" -->
+                <i class="tint icon"></i>
+              </div>
+          </div>
+          <div class="ui buttons icon animated fadeInRight faster text-options" id="text-alignment" style="display: none;">
+            <button class="ui button active" onclick="Tools.text.align(this, 'left')"><i class="align left icon"></i></button>
+            <button class="ui button" onclick="Tools.text.align(this, 'right')"><i class="align right icon"></i></button>
+            <button class="ui button" onclick="Tools.text.align(this, 'center')"><i class="align center icon"></i></button>
+          </div>
+          <div class="ui buttons icon animated fadeInRight faster text-options" id="text-style" style="display: none;">
+            <button class="ui button" onclick="Tools.text.bold(this)"><i class="bold icon"></i></button>
+            <button class="ui button" onclick="Tools.text.italic(this)"><i class="italic icon"></i></button>
+          </div>
         </div>
         <div id="container">
           <div id="mouseElement" style="position: absolute; top: 0; left: 0; width: 0; height: 0; overflow: hidden; z-index: 1500; backdrop-filter: brightness(400%); outline: aquamarine solid 1px;"></div>

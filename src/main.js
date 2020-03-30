@@ -39,6 +39,8 @@ function createScreenshotWindow(width, height, mode = 'photo') {
 
     takeScreenshotWindow.webContents.executeJavaScript("fullscreenScreenshot('image/png').then(() => select(canvas, 'image/png', true));", true);
   });
+
+  takeScreenshotWindow.on('closed', () => takeScreenshotWindow = null);
 }
 
 function createSettingsWindow(width, height) {
