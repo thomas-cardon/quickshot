@@ -3,17 +3,71 @@
     <head>
         <meta charset="utf-8">
         <title>Quickshot Settings</title>
-        <link rel="stylesheet" type="text/css" href="assets/semantic/dist/semantic.min.css">
+        <link rel="stylesheet" type="text/css" href="../assets/semantic/semantic.min.css">
     </head>
-    <body style="margin: 0;width: 100%;height: 100%; display: none;">
-        <div id="container">
+    <style>
+    html { overflow: hidden; }
+    body { margin: 0; width: 100%; height: 100%; }
+
+    #header {
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      width: 100% !important;
+      -webkit-app-region: drag;
+    }
+
+    #header > .item {
+      -webkit-app-region: no-drag;
+    }
+
+    * {
+      -webkit-user-select: none;
+    }
+    </style>
+    <body style="">
+      <div class="ui container">
+        <div class="ui menu" id="header">
+          <div class="header item">
+            Quickshot
+          </div>
+          <div class="item right" onclick="require('electron').remote.getCurrentWindow().close()"><i class="close icon"></i></div>
         </div>
+        <h1 style="padding-top: 5%;">Paramètres</h1>
+        <h2 class="ui dividing header">Raccourcis</h1>
+          <div class="ui form">
+            <div class="fields">
+              <div class="field">
+                <label>Capture d'écran</label>
+                <input type="text" id="shortcut-screenshot">
+              </div>
+              <div class="field">
+                <label>Capture d'écran rapide</label>
+                <input type="text" id="shortcut-screenshot-quick">
+              </div>
+              <div class="field">
+                <label>Capture vidéo</label>
+                <input type="text" id="shortcut-video">
+              </div>
+            </div>
+          </div>
+      </div>
         <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
         <script
           src="https://code.jquery.com/jquery-3.1.1.min.js"
           integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
           crossorigin="anonymous"></script>
-        <script src="assets/semantic/dist/semantic.min.js"></script>
+        <script src="../assets/semantic/semantic.min.js"></script>
         <script>if (window.module) module = window.module;</script>
+        <script>
+        const { FileStorage } = require('a-capsule');
+        let Storage = new FileStorage('file.json');
+
+        Storage.load().then(async () => {
+          await Storage.default()
+          .end();
+        });
+        </script>
   </body>
 </html>
