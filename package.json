@@ -1,6 +1,6 @@
 {
   "name": "quickshot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A screenshot tool",
   "main": "src/main.js",
   "scripts": {
@@ -11,13 +11,13 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
-    "Electron",
+    "Quickshot",
     "quick",
-    "start",
-    "tutorial",
-    "demo"
+    "screenshot",
+    "tool",
+    "concept"
   ],
-  "author": "GitHub",
+  "author": "Thomas Cardon",
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "5.0.13",
@@ -33,7 +33,7 @@
   "build": {
     "appId": "fr.ryzzzen.quickshot",
     "productName": "Quickshot",
-    "copyright": "Copyright © 2020 Ryzzzen",
+    "copyright": "Copyright © 2020 Thomas Cardon",
     "files": [
       "**/*",
       "build/icon.*",
