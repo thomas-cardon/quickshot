@@ -12,6 +12,7 @@ let Storage = new FileStorage('settings.json');
 
 /* Command line parameters */
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.allowRendererProcessReuse = true;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -34,7 +35,6 @@ function createScreenshotWindow(width, height, page = 'photo') {
     maximizable: false,
     transparent: true,
     hasShadow: false,
-    alwaysOnTop: !dev,
     kiosk: true,
     x: 0,
     y: 0,
@@ -44,19 +44,18 @@ function createScreenshotWindow(width, height, page = 'photo') {
       nodeIntegrationInWorker: true,
       webSecurity: false,
       experimentalFeatures: true,
-      allowRunningInsecureContent: true,
-      preload: path.join(__dirname, 'controllers\\preload.js')
+      allowRunningInsecureContent: true
     }
   });
 
   takeScreenshotWindow.loadFile(path.join(__dirname, '/views/', 'ui-' + mode + '.html'));
-  takeScreenshotWindow.webContents.executeJavaScript("global.UIEnabled = " + (page === 'photo' ? 'true;' : 'false;'));
+  takeScreenshotWindow.webContents.executeJavaScript("global.Store = " + JSON.stringify(Storage._store) + "; global.UIEnabled = " + (page === 'photo' ? 'true;' : 'false;'));
 
   takeScreenshotWindow.once('ready-to-show', () => takeScreenshotWindow.show());
 
   takeScreenshotWindow.on('show', () => {
     console.log('>> Screenshot window is now shown. Capturing source');
-    takeScreenshotWindow.webContents.executeJavaScript("take(" + JSON.stringify(Storage._store) + ");", true);
+    takeScreenshotWindow.webContents.executeJavaScript("take();", true);
   });
 }
 

@@ -1,5 +1,10 @@
 global.UIEnabled = true;
 
+function take() {
+  console.dir(Store);
+  fullscreenScreenshot('image/' + Store["photo-extension"]).then(canvas => select(canvas, 'image/' + Store["photo-extension"], UIEnabled, true));
+}
+
 const Tools = {
   drag: true,
   show: () => {

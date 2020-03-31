@@ -19,12 +19,12 @@ function fullscreenScreenshot(imageFormat) {
         video.style.cssText = 'position:absolute;top:-10000px;left:-10000px;';
 
         // Event connected to stream
-        video.onloadedmetadata = function () {
+        video.onloadedmetadata = async function () {
             // Set video ORIGINAL height (screenshot)
             video.style.height = this.videoHeight + 'px'; // videoHeight
             video.style.width = this.videoWidth + 'px'; // videoWidth
 
-            video.play();
+            await video.play();
 
             // Create canvas
             let canvas = document.createElement('canvas');
@@ -64,7 +64,9 @@ function fullscreenScreenshot(imageFormat) {
 
         for (const source of sources) {
             // Filter: main screen
-            if ((source.name === "Entire screen") || (source.name === "Screen 1") || (source.name === "Screen 2")) {
+            if (source.id === 'screen:1:0' || source.name === "Entire Screen" || source.name === "Entire screen" || source.name === "Screen 1" || source.name === "Screen 2") {
+              console.log('Acquired source', source.name);
+
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({
                         audio: false,
@@ -80,12 +82,18 @@ function fullscreenScreenshot(imageFormat) {
                         }
                     });
 
+                    console.log('Acquired stream');
+
                     return handleStream(stream);
                 } catch (e) {
+                    console.error(err);
                     reject(e);
                 }
             }
         }
-    }).catch(reject);
+    }).catch(err => {
+      console.error(err);
+      reject(err);
+    });
   });
 }
