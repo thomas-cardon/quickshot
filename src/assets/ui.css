@@ -1,0 +1,60 @@
+html { overflow: hidden; }
+body { margin: 0; width: 100%; height: 100%;  background-color: rgb(27, 18, 61); }
+
+#header {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100% !important;
+  -webkit-app-region: drag;
+}
+
+#close {
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+}
+
+* {
+  -webkit-user-select: none;
+}
+
+#header {
+  background-color: rgb(20, 14, 48);
+}
+
+*:not(input) {
+  color: white !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: antiquewhite !important;
+}
+
+a {
+  color: antiquewhite !important;
+  text-decoration: none;
+}
+
+a:visited, p {
+  color: rgb(136, 144, 181) !important;
+  text-decoration: none;
+}
+
+/* mouse over link */
+a:hover {
+  color: antiquewhite !important;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* selected link */
+a:active {
+  color: rgb(204, 173, 112) !important;
+  text-decoration: underline;
+}
+
+/* magic hack */
+.align {
+  margin: 0 8px 1em;
+}

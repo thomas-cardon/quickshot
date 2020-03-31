@@ -4,54 +4,47 @@
         <meta charset="utf-8">
         <title>Quickshot Settings</title>
         <link rel="stylesheet" type="text/css" href="../assets/semantic/semantic.min.css">
+        <link rel="stylesheet" type="text/css" href="../assets/ui.css">
     </head>
-    <style>
-    html { overflow: hidden; }
-    body { margin: 0; width: 100%; height: 100%; }
-
-    #header {
-      position: absolute;
-      top: 0;
-      left: 0;
-
-      width: 100% !important;
-      -webkit-app-region: drag;
-    }
-
-    #header > .item {
-      -webkit-app-region: no-drag;
-    }
-
-    * {
-      -webkit-user-select: none;
-    }
-    </style>
     <body style="">
       <div class="ui container">
         <div class="ui menu" id="header">
           <div class="header item">
-            Quickshot
+            Paramètres de Quickshot
           </div>
-          <div class="item right" onclick="require('electron').remote.getCurrentWindow().close()"><i class="close icon"></i></div>
+          <div class="item right" id="close" onclick="require('electron').remote.getCurrentWindow().close()"><i class="close icon"></i></div>
         </div>
-        <h1 style="padding-top: 5%;">Paramètres</h1>
-        <h2 class="ui dividing header">Raccourcis</h1>
-          <div class="ui form">
-            <div class="fields">
-              <div class="field">
-                <label>Capture d'écran</label>
-                <input type="text" id="shortcut-screenshot">
-              </div>
-              <div class="field">
-                <label>Capture d'écran rapide</label>
-                <input type="text" id="shortcut-screenshot-quick">
-              </div>
-              <div class="field">
-                <label>Capture vidéo</label>
-                <input type="text" id="shortcut-video">
-              </div>
+        <h3 style="padding-top: 5%;" class="ui header">Raccourcis</h3>
+        <p>Vous pouvez changer les raccourcis pour prendre des captures d'écran ici.</p>
+        <h5 class="ui centered header">Photos</h5>
+        <div class="ui form">
+          <div class="equal width fields">
+            <div class="field">
+              <label>Capture d'écran</label>
+              <input type="text" id="shortcut-photo" data-settings-id="">
             </div>
+            <div class="field">
+              <label>Capture d'écran rapide</label>
+              <input type="text" id="shortcut-instant" data-settings-id="">
+            </div>
+            <div class="field">
+              <label>Paramètres</label>
+              <input type="text" id="shortcut-settings" data-settings-id="">
+            </div>
+            <a class="align" onclick="require('electron').shell.openExternal('https://www.electronjs.org/docs/api/accelerator')">Format d'un raccourci</a>
+            <div class="field">
+              <label>Extension</label>
+              <input type="text" id="photo-extension" data-settings-id="">
+            </div>
+            <div class="field">
+              <label>Compression</label>
+              <input type="number" min="0" max="10" id="photo-compression" data-settings-id="">
+            </div>
+            <p class="align">0 vaut l'image la moins compressée, et 10 vaut l'inverse</p>
           </div>
+        </div>
+        <br><br>
+        <button class="ui secondary button" style="width: 94%;position: fixed;bottom: 20px;" onclick="saveSettings(this)">Sauvegarder les paramètres</button>
       </div>
         <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
         <script
@@ -62,12 +55,22 @@
         <script>if (window.module) module = window.module;</script>
         <script>
         const { FileStorage } = require('a-capsule');
-        let Storage = new FileStorage('file.json');
+        let Storage = new FileStorage('settings.json');
 
-        Storage.load().then(async () => {
-          await Storage.default()
-          .end();
-        });
+        Storage.load().then(() => loadSettings());
+
+        function loadSettings() {
+          document.querySelectorAll('input[data-settings-id]').forEach(x => {
+            console.log(x.dataset.settingsId === '' ? x.id : dataset.settingsId);
+            x.value = Storage.get(x.dataset.settingsId === '' ? x.id : dataset.settingsId);
+            x.addEventListener('change', () => Storage.set(x.dataset.settingsId === '' ? x.id : dataset.settingsId, x.value));
+          });
+        }
+
+        function saveSettings(el) {
+          el.disabled = true;
+          Storage.save().then(() => el.disabled = false);
+        }
         </script>
   </body>
 </html>

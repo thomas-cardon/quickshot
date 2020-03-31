@@ -2,6 +2,9 @@
 const { app, BrowserWindow, globalShortcut } = require('electron')
 const path = require('path')
 
+const { FileStorage } = require('a-capsule');
+let Storage = new FileStorage('settings.json');
+
 /* Command line parameters */
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
@@ -45,8 +48,7 @@ function createScreenshotWindow(width, height, page = 'photo') {
 
   takeScreenshotWindow.on('show', () => {
     console.log('>> Screenshot window is now shown. Capturing source');
-
-    takeScreenshotWindow.webContents.executeJavaScript("take();", true);
+    takeScreenshotWindow.webContents.executeJavaScript("take(" + JSON.stringify(Storage._store) + ");global.UIEnabled = " + (page === 'photo' ? 'true;' : 'false;'), true);
   });
 }
 
@@ -75,36 +77,46 @@ function createSettingsWindow(width, height) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  console.log('>> Ready, Electron:', process.versions.electron);
+  Storage.load().then(async () => {
+    await Storage.default()
+    .add('shortcut-photo', 'PrintScreen')
+    .add('shortcut-instant', 'Shift+PrintScreen')
+    .add('shortcut-settings', 'CommandOrControl+PrintScreen')
+    .add('photo-extension', 'png')
+    .add('photo-compression', 2)
+    .end();
 
-  globalShortcut.register('PrintScreen', () => {
-    const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+    console.log('>> Ready, Electron:', process.versions.electron);
 
-    console.log('>> PrintScreen key pressed!');
-    if (takeScreenshotWindow && !takeScreenshotWindow.isDestroyed() && mode !== 'photo') {
-      takeScreenshotWindow.destroy();
-      createScreenshotWindow(width, height, 'photo');
-    }
-    else if (!takeScreenshotWindow || takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height, 'photo');
-    else takeScreenshotWindow.show();
-  });
+    globalShortcut.register(Storage.get('shortcut-photo'), () => {
+      const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
 
-  globalShortcut.register('Shift+PrintScreen', () => {
-    const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+      console.log('>> PrintScreen key pressed!');
+      if (takeScreenshotWindow && !takeScreenshotWindow.isDestroyed() && mode !== 'photo') {
+        takeScreenshotWindow.destroy();
+        createScreenshotWindow(width, height, 'photo');
+      }
+      else if (!takeScreenshotWindow || takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height, 'photo');
+      else takeScreenshotWindow.show();
+    });
 
-    console.log('>> Shift+PrintScreen key pressed!');
-    if (takeScreenshotWindow && !takeScreenshotWindow.isDestroyed() && mode !== 'instant') {
-      takeScreenshotWindow.destroy();
-      createScreenshotWindow(width, height, 'instant');
-    }
-    else if (!takeScreenshotWindow || takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height, 'instant');
-    else takeScreenshotWindow.show();
-  });
+    globalShortcut.register(Storage.get('shortcut-instant'), () => {
+      const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
 
-  globalShortcut.register('CommandOrControl+PrintScreen', () => {
-    console.log('>> Settings key pressed!');
-    if (settingsWindow === null) createSettingsWindow();
-    else settingsWindow.show();
+      console.log('>> Shift+PrintScreen key pressed!');
+      if (takeScreenshotWindow && !takeScreenshotWindow.isDestroyed() && mode !== 'instant') {
+        takeScreenshotWindow.destroy();
+        createScreenshotWindow(width, height, 'instant');
+      }
+      else if (!takeScreenshotWindow || takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height, 'instant');
+      else takeScreenshotWindow.show();
+    });
+
+    globalShortcut.register(Storage.get('shortcut-settings'), () => {
+      console.log('>> Settings key pressed!');
+      if (!settingsWindow) createSettingsWindow();
+      else settingsWindow.show();
+    });
   });
 });
 
