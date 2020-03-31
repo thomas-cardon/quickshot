@@ -1,3 +1,5 @@
+global.UIEnabled = true;
+
 const Tools = {
   drag: true,
   show: () => {
@@ -141,7 +143,9 @@ const Tools = {
   }
 };
 
-if (!global.UIEnabled) {
-  console.log('Tools >> Instant Photo mode. Disabling');
-  Tools.show = Tools.hide = function() {};
-}
+document.addEventListener('DOMContentLoaded', () => {
+  if (!UIEnabled) {
+    console.log('Tools >> Instant Photo mode. Disabling');
+    Tools.show = Tools.hide = function() {};
+  }
+});

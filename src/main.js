@@ -4,9 +4,8 @@ const path = require('path');
 
 const gotTheLock = app.requestSingleInstanceLock();
 
-if (!gotTheLock) {
+if (!gotTheLock)
   return app.quit();
-}
 
 const { FileStorage } = require('a-capsule');
 let Storage = new FileStorage('settings.json');
@@ -51,12 +50,13 @@ function createScreenshotWindow(width, height, page = 'photo') {
   });
 
   takeScreenshotWindow.loadFile(path.join(__dirname, '/views/', 'ui-' + mode + '.html'));
+  takeScreenshotWindow.webContents.executeJavaScript("global.UIEnabled = " + (page === 'photo' ? 'true;' : 'false;'));
 
   takeScreenshotWindow.once('ready-to-show', () => takeScreenshotWindow.show());
 
   takeScreenshotWindow.on('show', () => {
     console.log('>> Screenshot window is now shown. Capturing source');
-    takeScreenshotWindow.webContents.executeJavaScript("take(" + JSON.stringify(Storage._store) + ");global.UIEnabled = " + (page === 'photo' ? 'true;' : 'false;'), true);
+    takeScreenshotWindow.webContents.executeJavaScript("take(" + JSON.stringify(Storage._store) + ");", true);
   });
 }
 
@@ -81,16 +81,18 @@ function createSettingsWindow(width, height) {
   });
 }
 
+let F = {};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
   tray = new Tray(path.join(__dirname, '../build/icon.ico'));
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Capture d\'écran' },
-    { label: 'Instantané' },
+    { label: 'Capture d\'écran', click: () => F.photo() },
+    { label: 'Instantané', click: () => F.instant() },
     { type: 'separator' },
-    { label: 'Paramètres' },
+    { label: 'Paramètres', click: () => F.settings() },
     { label: 'Quitter', click: app.quit }
   ]);
 
@@ -108,7 +110,7 @@ app.on('ready', () => {
 
     console.log('>> Ready, Electron:', process.versions.electron);
 
-    globalShortcut.register(Storage.get('shortcut-photo'), () => {
+    globalShortcut.register(Storage.get('shortcut-photo'), F.photo = () => {
       const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
 
       console.log('>> PrintScreen key pressed!');
@@ -120,7 +122,7 @@ app.on('ready', () => {
       else takeScreenshotWindow.show();
     });
 
-    globalShortcut.register(Storage.get('shortcut-instant'), () => {
+    globalShortcut.register(Storage.get('shortcut-instant'), F.instant = () => {
       const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
 
       console.log('>> Shift+PrintScreen key pressed!');
@@ -132,7 +134,7 @@ app.on('ready', () => {
       else takeScreenshotWindow.show();
     });
 
-    globalShortcut.register(Storage.get('shortcut-settings'), () => {
+    globalShortcut.register(Storage.get('shortcut-settings'), F.settings = () => {
       console.log('>> Settings key pressed!');
       if (!settingsWindow) createSettingsWindow();
       else settingsWindow.show();
