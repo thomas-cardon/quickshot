@@ -5,11 +5,19 @@ const Region = {
     if (full) {
       try {
         canvas.remove();
+
+        delete global.ctx;
+        delete global.canvas;
       }
       catch(err) {}
 
       document.body.style.display = 'none';
     }
+
+    Tools.hide();
+
+    Tools._cPushArray = [];
+    Tools._cStep = -1;
 
     document.getElementById('mouseElement').display = 'none';
 
