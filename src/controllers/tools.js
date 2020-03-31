@@ -95,7 +95,7 @@ const Tools = {
   },
   text: {
     enabled: false,
-    options: { text: 'Hello World', style: 'normal', variant: 'normal', weight: 'normal', size: '30px', family: 'arial', color: 'black' },
+    options: { style: 'normal', variant: 'normal', weight: 'normal', size: '30px', family: 'arial', color: 'black' },
     toggle: function(el) {
       if (Tools.pencil.enabled)
         document.getElementById('pencil-btn').click();
@@ -122,7 +122,7 @@ const Tools = {
       ctx.fillStyle = Tools.text.options.color;
       ctx.textAlign = Tools.text.options.align || "left";
 
-      ctx.fillText(Tools.text.options.text, e.clientX, e.clientY);
+      ctx.fillText(document.getElementById('text').value, e.clientX, e.clientY);
     },
     align: function(el, alignment) {
       Tools.text.options.align = alignment;

@@ -26,7 +26,6 @@
   "dependencies": {
     "a-capsule": "^3.0.0",
     "electron-updater": "^4.2.5",
-    "emojipanel": "git+https://github.com/danbovey/EmojiPanel.git",
     "sharp": "^0.25.2"
   },
   "repository": "https://github.com/Ryzzzen/quickshot",
