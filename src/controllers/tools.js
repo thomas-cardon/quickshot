@@ -26,6 +26,12 @@ const Tools = {
     document.getElementById('tools').style.display = 'none';
     document.getElementById('text-tools').style.display = 'none';
     document.getElementById('text-form').style.display = 'none';
+
+    if (Tools.pencil.enabled)
+      Tools.pencil.toggle();
+
+    if (Tools.text.enabled)
+      Tools.text.toggle();
   },
   inBounds: function(x, y) {
     console.log(x, y);
