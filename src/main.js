@@ -13,6 +13,8 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 let takeScreenshotWindow, mode, settingsWindow;
 const dev = process.argv.includes('--dev');
 
+const { autoUpdater } = require('electron-updater');
+
 function createScreenshotWindow(width, height, page = 'photo') {
   mode = page;
 

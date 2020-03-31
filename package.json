@@ -5,9 +5,11 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron . --dev",
-    "rebuild": "./node_modules/.bin/electron-rebuild"
+    "build": "electron-builder --win",
+    "ship": "electron-builder --win --ia32 --x64 -p always",
+    "rebuild": "./node_modules/.bin/electron-rebuild",
+    "postinstall": "electron-builder install-app-deps"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
     "Electron",
     "quick",
@@ -18,12 +20,30 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "5.0.0",
-    "electron-rebuild": "^1.8.6"
+    "electron": "5.0.13",
+    "electron-builder": "^22.4.1"
   },
   "dependencies": {
     "a-capsule": "^3.0.0",
+    "electron-updater": "^4.2.5",
     "emojipanel": "git+https://github.com/danbovey/EmojiPanel.git",
     "sharp": "^0.25.2"
+  },
+  "repository": "https://github.com/Ryzzzen/quickshot",
+  "build": {
+    "appId": "fr.ryzzzen.quickshot",
+    "productName": "Quickshot",
+    "copyright": "Copyright © 2020 Ryzzzen",
+    "files": [
+      "**/*",
+      "build/icon.*",
+      "!screenshots/*",
+      "!*.md",
+      "!*.yml",
+      "!docs/*"
+    ],
+    "nsis": {
+      "license": "LICENSE.md"
+    }
   }
 }
