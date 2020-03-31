@@ -1,6 +1,12 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, globalShortcut, Menu, Tray } = require('electron')
-const path = require('path')
+const { app, BrowserWindow, globalShortcut, Menu, Tray } = require('electron');
+const path = require('path');
+
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  return app.quit();
+}
 
 const { FileStorage } = require('a-capsule');
 let Storage = new FileStorage('settings.json');
@@ -85,6 +91,7 @@ app.on('ready', () => {
     { label: 'Instantané' },
     { type: 'separator' },
     { label: 'Paramètres' },
+    { label: 'Quitter', click: app.quit }
   ]);
 
   tray.setToolTip('Quickshot - Screenshot Tool');
