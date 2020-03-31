@@ -2,7 +2,7 @@
 * Extracts region from base64 image using coordinates
 * compressionLevel = 1 to 10
 */
-async function extract(base64data, extractOptions, filePath = 'clipboard', extension = Store["photo-extension"], compressionLevel = Store["photo-compression"], closeWhenFinished) {
+async function extract(base64data, extractOptions, filePath = 'clipboard', extension = Store["photo-extension"], compressionLevel = Store["photo-compression"]) {
   console.log('Started extracting image');
 
   const sharp = require('sharp');
@@ -29,13 +29,10 @@ async function extract(base64data, extractOptions, filePath = 'clipboard', exten
   .toFormat(extension, compressionOptions);
 
   if (filePath === 'clipboard') {
-    let buffer = await instance.toBuffer();
-    require('./copy-to-clipboard')(buffer);
+    require('./copy-to-clipboard')(await instance.toBuffer());
   }
+  else if (filePath === 'buffer') return await instance.toBuffer();
   else await instance.toFile(filePath);
-
-  if (closeWhenFinished)
-    require('electron').remote.getCurrentWindow().close();
 }
 
 module.exports = extract;
