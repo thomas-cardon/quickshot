@@ -76,7 +76,7 @@ function select(canvas, imageFormat, tools, firstTime) {
 
 function save(path = 'clipboard') {
   require('electron').remote.getCurrentWindow().hide();
-  require('../controllers/extract-photo')(canvas.toDataURL('image/png'), options, path);
+  require('../controllers/extract-photo')(canvas.toDataURL('image/' + Store["photo-extension"]), options, path);
 
   Tools.hide();
   Region.cancel(true);

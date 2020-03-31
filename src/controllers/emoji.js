@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded",() => {
+document.addEventListener("DOMContentLoaded", () => {
   require('emojipanel');
   let panel = new EmojiPanel({
     container: '#container',

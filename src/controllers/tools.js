@@ -141,7 +141,7 @@ const Tools = {
   }
 };
 
-if (!UIEnabled) {
+if (!global.UIEnabled) {
   console.log('Tools >> Instant Photo mode. Disabling');
   Tools.show = Tools.hide = function() {};
 }
