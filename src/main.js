@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, globalShortcut } = require('electron')
+const { app, BrowserWindow, globalShortcut, Menu, Tray } = require('electron')
 const path = require('path')
 
 const { FileStorage } = require('a-capsule');
@@ -77,6 +77,17 @@ function createSettingsWindow(width, height) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+  tray = new Tray(path.join(__dirname, '../build/icon.ico'));
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Capture d\'écran' },
+    { label: 'Instantané' },
+    { type: 'separator' },
+    { label: 'Paramètres' },
+  ]);
+
+  tray.setToolTip('Quickshot - Screenshot Tool');
+  tray.setContextMenu(contextMenu);
+
   Storage.load().then(async () => {
     await Storage.default()
     .add('shortcut-photo', 'PrintScreen')
