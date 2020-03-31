@@ -34,6 +34,9 @@ const Tools = {
 
     if (Tools.text.enabled)
       Tools.text.toggle();
+
+    if (Tools.arrow.enabled)
+      Tools.arrow.toggle();
   },
   inBounds: function(x, y) {
     console.log(x, y);
@@ -56,19 +59,58 @@ const Tools = {
     Tools._cPushArray.push(canvas.toDataURL());
   },
   undo: () => {
-    if (Tools._cStep > 0) {
-      Tools._cStep--;
-      var canvasPic = new Image();
-      canvasPic.src = Tools._cPushArray[Tools._cStep];
-      canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
-    }
+    if (Tools._cStep === 0) return;
+    Tools._cStep--;
+    var canvasPic = new Image();
+    canvasPic.src = Tools._cPushArray[Tools._cStep];
+    canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
   },
   redo: () => {
-    if (Tools._cStep < Tools._cPushArray.length-1) {
+    if (Tools._cStep < Tools._cPushArray.length - 1) {
         Tools._cStep++;
         var canvasPic = new Image();
         canvasPic.src = Tools._cPushArray[Tools._cStep];
         canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
+    }
+  },
+  arrow: {
+    enabled: false,
+    toggle: function(el) {
+      this.disabled = !Tools.arrow.enabled;
+
+      if (Tools.pencil.enabled)
+        document.getElementById('pencil-btn').click();
+
+      if (!Tools.arrow.enabled) {
+        Tools.arrow.enabled = true;
+
+        document.addEventListener('mousedown', Tools.arrow.onMouseDownEvent);
+        document.addEventListener('mouseup', Tools.arrow.onMouseUpEvent);
+      }
+      else {
+        Tools.arrow.enabled = false;
+
+        document.removeEventListener('mousedown', Tools.arrow.onMouseDownEvent);
+        document.removeEventListener('mouseup', Tools.arrow.onMouseUpEvent);
+      }
+    },
+    onMouseUpEvent: (e) => {
+      if (!Tools.inBounds(e.clientX, e.clientY)) return console.log('Out of bounds error!');
+
+      console.dir(e);
+
+      ctx.beginPath();
+      ctx.arrow(Tools.arrow.ox, Tools.arrow.oy, e.clientX, e.clientY, [0, 1, -10, 1, -10, 5]);
+      ctx.fill();
+
+      Tools.arrow.toggle();
+    },
+    onMouseDownEvent: (e) => {
+      if (!Tools.inBounds(Tools.arrow.ox, Tools.arrow.oy)) return console.log('Out of bounds error!');
+
+      Tools.arrow.ox = e.clientX;
+      Tools.arrow.oy = e.clientY;
+      Tools._cPush();
     }
   },
   pencil: {
