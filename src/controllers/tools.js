@@ -1,5 +1,25 @@
 const Tools = {
   drag: true,
+  show: () => {
+    document.getElementById('tools').style.top = (leftY - 50) + 'px';
+    document.getElementById('tools').style.left = leftX + 'px';
+
+    document.getElementById('tools').style.display = 'block';
+
+    document.getElementById('text-tools').style.display = 'block';
+    document.getElementById('text-form').style.display = 'block';
+
+    document.getElementById('text-tools').style.top = leftY + 'px';
+    document.getElementById('text-tools').style.left = (rightX + 20) + 'px';
+
+    document.getElementById('text-form').style.top = (rightY + 15) + 'px';
+    document.getElementById('text-form').style.left = leftX + 'px';
+  },
+  hide: () => {
+    document.getElementById('tools').style.display = 'none';
+    document.getElementById('text-tools').style.display = 'none';
+    document.getElementById('text-form').style.display = 'none';
+  },
   inBounds: function(x, y) {
     console.log(x, y);
     if (x < options.left || x >= (options.left + options.width)) return false;
@@ -7,10 +27,19 @@ const Tools = {
 
     return true;
   },
+  crop: () => {
+    Region.cancel(false);
+    Tools.hide();
+
+    fullscreenScreenshot('image/png').then(canvas => select(canvas, 'image/png', true));
+  },
   pencil: {
     enabled: false,
     toggle: function(el) {
       this.disabled = !Tools.pencil.enabled;
+
+      if (Tools.text.enabled)
+        document.getElementById('text-btn').click();
 
       if (!Tools.pencil.enabled) {
         Tools.pencil.enabled = true;
@@ -55,11 +84,14 @@ const Tools = {
     enabled: false,
     options: { text: 'Hello World', style: 'normal', variant: 'normal', weight: 'normal', size: '30px', family: 'arial', color: 'black' },
     toggle: function(el) {
+      if (Tools.pencil.enabled)
+        document.getElementById('pencil-btn').click();
+
       if (!Tools.text.enabled) {
         Tools.text.enabled = true;
         el.classList.add('active');
 
-        document.querySelectorAll('.text-options').forEach(x => x.style.display = 'inline-block');
+        document.querySelectorAll('.text-options').forEach(x => x.style.display = 'block');
         document.addEventListener('mousedown', Tools.text.onMouseDownEvent);
       }
       else {
@@ -108,3 +140,8 @@ const Tools = {
     }
   }
 };
+
+if (!UIEnabled) {
+  console.log('Tools >> Instant Photo mode. Disabling');
+  Tools.show = Tools.hide = function() {};
+}

@@ -27,7 +27,7 @@ function fullscreenScreenshot(imageFormat) {
             video.play();
 
             // Create canvas
-            global.canvas = document.createElement('canvas');
+            let canvas = document.createElement('canvas');
 
             canvas.width = this.videoWidth;
             canvas.height = this.videoHeight;
@@ -40,7 +40,7 @@ function fullscreenScreenshot(imageFormat) {
 
             canvas.style.filter = 'brightness(30%)';
 
-            global.ctx = canvas.getContext('2d');
+            let ctx = canvas.getContext('2d');
 
             // Draw video on canvas
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);

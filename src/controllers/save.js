@@ -1,5 +1,22 @@
 let leftX, leftY, rightX, rightY, isDown;
-let showTools = false;
+
+const Region = {
+  cancel: function(full) {
+    if (full) {
+      try {
+        canvas.remove();
+      }
+      catch(err) {}
+
+      document.body.style.display = 'none';
+    }
+
+    document.getElementById('mouseElement').display = 'none';
+
+    document.getElementById('mouseElement').style.top = document.getElementById('mouseElement').style.left = '0px';
+    document.getElementById('mouseElement').style.width = document.getElementById('mouseElement').style.height = '0px';
+  }
+};
 
 function onMouseDownEvent(e) {
   leftX = e.clientX;
@@ -32,47 +49,35 @@ function onMouseUpEvent(e) {
 
   console.log('Stopped to coords: ' + rightX + ', Y coords: ' + rightY);
 
-  if (!showTools) {
-    document.getElementById('mouseElement').display = 'none';
-
-    document.getElementById('mouseElement').style.top = document.getElementById('mouseElement').style.left = '0px';
-    document.getElementById('mouseElement').style.width = document.getElementById('mouseElement').style.height = '0px';
-  }
-  else {
-    document.getElementById('tools').style.top = leftY - 50 + 'px';
-    document.getElementById('tools').style.left = leftX + 'px';
-
-    document.getElementById('tools').style.display = 'block';
-  }
-
   global.options = { left: leftX, top: leftY, width: rightX - leftX, height: rightY - leftY };
   if (options.width <= 0 || options.height <= 0)
     return console.log('Error: coordinates are < 0');
 
+  if (!UIEnabled) save();
+  else Tools.show();
+
   document.removeEventListener('mousedown', onMouseDownEvent);
   document.removeEventListener('mousemove', onMouseMoveEvent);
   document.removeEventListener('mouseup', onMouseUpEvent);
-
-  if (showTools)
-    return;
-
-  save();
 }
 
-function select(canvas, imageFormat, tools) {
-  showTools = tools;
-
-  document.body.style.display = 'block';
+function select(canvas, imageFormat, tools, firstTime) {
   document.getElementById('container').prepend(canvas);
+
+  global.canvas = canvas;
+  global.ctx = canvas.getContext('2d');
 
   document.addEventListener('mousedown', onMouseDownEvent);
   document.addEventListener('mousemove', onMouseMoveEvent);
   document.addEventListener('mouseup', onMouseUpEvent);
+
+  document.body.style.display = 'block';
 }
 
-function save() {
-  document.body.style.display = 'none';
-  document.getElementById('container').innerHTML = '';
+function save(path = 'clipboard') {
+  require('electron').remote.getCurrentWindow().hide();
+  require('../controllers/extract-photo')(canvas.toDataURL('image/png'), options, path);
 
-  require('../controllers/extract-photo')(canvas.toDataURL('image/png'), options);
+  Tools.hide();
+  Region.cancel(true);
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Quickshot Cropper</title>
+        <link rel="stylesheet" type="text/css" href="../assets/semantic/semantic.min.css">
+        <link rel="stylesheet" type="text/css" href="../../node_modules/emojipanel/dist/emojipanel.css">
+        <!--link rel="stylesheet" type="text/css" href="../assets/animate.css"-->
+    </head>
+    <body style="margin: 0;width: 100%;height: 100%; display: none;overflow: hidden;">
+        <div id="tools" style="position: absolute; display: none; top: 0; left: 0; z-index: 1000;">
+          <div class="ui icon buttons" style="display: inline-block;">
+            <button class="ui button" id="pencil-btn" onclick="Tools.pencil.toggle(this)"><i class="pencil alternate icon"></i></button>
+            <button class="ui button" id="text-btn" onclick="Tools.text.toggle(this)"><i class="font icon"></i></button>
+            <button class="ui button" onclick="Tools.crop(this)"><i class="crop icon"></i></button>
+            <button class="ui button" onclick="save('clipboard')"><i class="copy icon"></i></button>
+            <button class="ui button" onclick="save(require('electron').remote.dialog.showSaveDialog({ title: 'Save the screenshot', defaultPath: 'screenshot.png' }))"><i class="save icon"></i></button>
+          </div>
+        </div>
+        <div id="text-tools" style="position: absolute; display: none; top: 0; left: 0; z-index: 1000;">
+          <div class="ui vertical buttons icon text-options" style="display: none;">
+            <div class="ui button" id="text-color-btn" onclick="this.children[0].click();" disabled=true>
+              <input type="color" id="text-color" value="#fdffff" style="display: none;" onchange="console.log(this.value)">
+              <!-- onchange="Tools.text.options.color = document.getElementById('text-color-btn').value = document.getElementById('text-color').value;" -->
+              <i class="tint icon"></i>
+            </div>
+            <button class="ui button" id="emoji-btn">😎</button>
+          </div>
+          <div class="ui vertical buttons icon text-options" id="text-alignment" style="display: none;">
+            <button class="ui button active" onclick="Tools.text.align(this, 'left')"><i class="align left icon"></i></button>
+            <button class="ui button" onclick="Tools.text.align(this, 'center')"><i class="align center icon"></i></button>
+            <button class="ui button" onclick="Tools.text.align(this, 'right')"><i class="align right icon"></i></button>
+          </div>
+          <div class="ui vertical buttons icon text-options" id="text-style" style="display: none;">
+            <button class="ui button" onclick="Tools.text.bold(this)"><i class="bold icon"></i></button>
+            <button class="ui button" onclick="Tools.text.italic(this)"><i class="italic icon"></i></button>
+          </div>
+        </div>
+        <div id="container">
+          <div id="mouseElement" style="position: absolute; top: 0; left: 0; width: 0; height: 0; overflow: hidden; z-index: 1500; backdrop-filter: brightness(400%); outline: aquamarine solid 1px;"></div>
+        </div>
+        <div id="text-form" class="text-options" style="position: absolute; display: none; top: 0; left: 0; z-index: 1000;">
+          <div class="ui labeled input">
+            <div class="ui label">
+              Texte
+            </div>
+            <input type="text" id="text" onchange="Tools.text.options.text = this.value">
+          </div>
+        </div>
+        <script src="../controllers/cropper-photo.js"></script>
+        <script src="../controllers/tools.js"></script>
+        <script src="../controllers/emoji.js"></script>
+        <script>
+          document.getElementById('container').style.width = window.screen.width + 'px';
+          document.getElementById('container').style.height = window.screen.height + 'px';
+
+          document.addEventListener('keydown', function (e) {
+            if (e.which === 123)
+              require('electron').remote.getCurrentWindow().toggleDevTools();
+            else if (e.which === 27) {
+              Region.cancel(true);
+              require('electron').remote.getCurrentWindow().hide();
+            }
+          });
+        </script>
+        <script src="../controllers/save.js"></script>
+  </body>
+</html>

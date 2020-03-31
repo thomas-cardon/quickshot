@@ -2,13 +2,17 @@
 const { app, BrowserWindow, globalShortcut } = require('electron')
 const path = require('path')
 
+/* Command line parameters */
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let takeScreenshotWindow = null, settingsWindow = null;
+let takeScreenshotWindow, mode, settingsWindow;
 const dev = process.argv.includes('--dev');
 
-function createScreenshotWindow(width, height, mode = 'photo') {
-  // Create the browser window.
+function createScreenshotWindow(width, height, page = 'photo') {
+  mode = page;
+
   takeScreenshotWindow = new BrowserWindow({
     width,
     height,
@@ -19,6 +23,7 @@ function createScreenshotWindow(width, height, mode = 'photo') {
     minimizable: false,
     maximizable: false,
     transparent: true,
+    hasShadow: false,
     alwaysOnTop: !dev,
     kiosk: true,
     x: 0,
@@ -26,21 +31,23 @@ function createScreenshotWindow(width, height, mode = 'photo') {
     thickFrame: false,
     webPreferences: {
       nodeIntegration: true,
-      experimentalFeatures: true
+      nodeIntegrationInWorker: true,
+      webSecurity: false,
+      experimentalFeatures: true,
+      allowRunningInsecureContent: true,
+      preload: path.join(__dirname, 'controllers\\preload.js')
     }
   });
 
-  takeScreenshotWindow.loadFile(path.join(__dirname, '/views/', 'cropper-' + mode + '.html'));
+  takeScreenshotWindow.loadFile(path.join(__dirname, '/views/', 'ui-' + mode + '.html'));
 
   takeScreenshotWindow.once('ready-to-show', () => takeScreenshotWindow.show());
 
   takeScreenshotWindow.on('show', () => {
     console.log('>> Screenshot window is now shown. Capturing source');
 
-    takeScreenshotWindow.webContents.executeJavaScript("fullscreenScreenshot('image/png').then(() => select(canvas, 'image/png', true));", true);
+    takeScreenshotWindow.webContents.executeJavaScript("take();", true);
   });
-
-  takeScreenshotWindow.on('closed', () => takeScreenshotWindow = null);
 }
 
 function createSettingsWindow(width, height) {
@@ -56,7 +63,7 @@ function createSettingsWindow(width, height) {
     }
   });
 
-  settingsWindow.loadFile(path.join(__dirname, '/views/', 'settings.html'));
+  settingsWindow.loadFile(path.join(__dirname, '/views/', 'ui-settings.html'));
 
   // Emitted when the window is closed.
   settingsWindow.on('closed', function () {
@@ -68,13 +75,29 @@ function createSettingsWindow(width, height) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  console.log('>> Ready');
+  console.log('>> Ready, Electron:', process.versions.electron);
 
   globalShortcut.register('PrintScreen', () => {
     const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
 
     console.log('>> PrintScreen key pressed!');
-    if (takeScreenshotWindow === null) createScreenshotWindow(width, height);
+    if (takeScreenshotWindow && !takeScreenshotWindow.isDestroyed() && mode !== 'photo') {
+      takeScreenshotWindow.destroy();
+      createScreenshotWindow(width, height, 'photo');
+    }
+    else if (!takeScreenshotWindow || takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height, 'photo');
+    else takeScreenshotWindow.show();
+  });
+
+  globalShortcut.register('Shift+PrintScreen', () => {
+    const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+
+    console.log('>> Shift+PrintScreen key pressed!');
+    if (takeScreenshotWindow && !takeScreenshotWindow.isDestroyed() && mode !== 'instant') {
+      takeScreenshotWindow.destroy();
+      createScreenshotWindow(width, height, 'instant');
+    }
+    else if (!takeScreenshotWindow || takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height, 'instant');
     else takeScreenshotWindow.show();
   });
 
@@ -88,7 +111,7 @@ app.on('ready', () => {
 app.on('activate', function () {
   const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
 
-  if (takeScreenshotWindow === null) createScreenshotWindow(width, height);
+  if (takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height);
   else takeScreenshotWindow.show();
 });
 

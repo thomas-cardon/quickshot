@@ -37,9 +37,6 @@ async function extract(base64data, extractOptions, filePath = 'clipboard', exten
 
   if (closeWhenFinished)
     require('electron').remote.getCurrentWindow().close();
-  else {
-    require('electron').remote.getCurrentWindow().hide();
-  }
 }
 
 module.exports = extract;
