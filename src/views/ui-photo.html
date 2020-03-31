@@ -15,6 +15,11 @@
             <button class="ui button" onclick="save('clipboard');"><i class="copy icon"></i></button>
             <button class="ui button" onclick="save(require('electron').shell.showItemInFolder(require('electron').remote.dialog.showSaveDialog({ title: 'Save the screenshot', defaultPath: 'screenshot.png' })));"><i class="save icon"></i></button>
           </div>
+
+          <div class="ui icon buttons" style="display: inline-block;">
+            <button class="ui button" id="undo-btn" onclick="Tools.undo(this);"><i class="undo icon"></i></button>
+            <button class="ui button" id="redo-btn" onclick="Tools.redo(this);"><i class="redo icon"></i></button>
+          </div>
         </div>
         <div id="text-tools" style="position: absolute; display: none; top: 0; left: 0; z-index: 1000;">
           <div class="ui vertical buttons icon text-options" style="display: none;">
@@ -31,6 +36,7 @@
           <div class="ui vertical buttons icon text-options" id="text-style" style="display: none;">
             <button class="ui button" onclick="Tools.text.bold(this)"><i class="bold icon"></i></button>
             <button class="ui button" onclick="Tools.text.italic(this)"><i class="italic icon"></i></button>
+            <button class="ui button" onclick="Tools.text.arrow(this)"><i class="long arrow alternate up icon"></i></button>
           </div>
         </div>
         <div id="container">
@@ -42,6 +48,7 @@
             <input type="text" id="text">
           </div>
         </div>
+        <script src="../controllers/canvas-arrow.js"></script>
         <script src="../controllers/cropper-photo.js"></script>
         <script src="../controllers/tools.js"></script>
         <script>

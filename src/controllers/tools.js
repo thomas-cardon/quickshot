@@ -21,6 +21,8 @@ const Tools = {
 
     document.getElementById('text-form').style.top = (rightY + 15) + 'px';
     document.getElementById('text-form').style.left = leftX + 'px';
+
+    document.getElementById('text').style.width = (rightX - leftX - 44) + 'px';
   },
   hide: () => {
     document.getElementById('tools').style.display = 'none';
@@ -46,6 +48,29 @@ const Tools = {
 
     fullscreenScreenshot('image/png').then(canvas => select(canvas, 'image/png', true));
   },
+  _cPushArray: [],
+  _cStep: -1,
+  _cPush: () => {
+    Tools._cStep++;
+    if (Tools._cStep < Tools._cPushArray.length) { Tools._cPushArray.length = Tools._cStep; }
+    Tools._cPushArray.push(canvas.toDataURL());
+  },
+  undo: () => {
+    if (Tools._cStep > 0) {
+      Tools._cStep--;
+      var canvasPic = new Image();
+      canvasPic.src = Tools._cPushArray[Tools._cStep];
+      canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
+    }
+  },
+  redo: () => {
+    if (Tools._cStep < Tools._cPushArray.length-1) {
+        Tools._cStep++;
+        var canvasPic = new Image();
+        canvasPic.src = Tools._cPushArray[Tools._cStep];
+        canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
+    }
+  },
   pencil: {
     enabled: false,
     toggle: function(el) {
@@ -58,7 +83,7 @@ const Tools = {
         Tools.pencil.enabled = true;
         el.classList.add('active');
 
-        document.addEventListener('mousedown', Tools.pencil.setPosition);
+        document.addEventListener('mousedown', Tools.pencil.onMouseDownEvent);
         document.addEventListener('mouseenter', Tools.pencil.setPosition);
         document.addEventListener('mousemove', Tools.pencil.onMouseMoveEvent);
       }
@@ -66,7 +91,7 @@ const Tools = {
         Tools.pencil.enabled = false;
         el.classList.remove('active');
 
-        document.removeEventListener('mousedown', Tools.pencil.setPosition);
+        document.removeEventListener('mousedown', Tools.pencil.onMouseDownEvent);
         document.removeEventListener('mouseenter', Tools.pencil.setPosition);
         document.removeEventListener('mousemove', Tools.pencil.onMouseMoveEvent);
       }
@@ -87,6 +112,10 @@ const Tools = {
 
       ctx.stroke(); // draw it!
 
+    },
+    onMouseDownEvent: (e) => {
+      Tools._cPush();
+      Tools.pencil.setPosition(e);
     },
     setPosition: (e) => {
       Tools.pencil.x = e.clientX;
@@ -117,6 +146,7 @@ const Tools = {
     },
     onMouseDownEvent: function(e) {
       if (!Tools.inBounds(e.clientX, e.clientY)) return console.log('Out of bounds error!');
+      Tools._cPush();
 
       ctx.font = `${Tools.text.options.style} ${Tools.text.options.variant} ${Tools.text.options.weight} ${Tools.text.options.size} ${Tools.text.options.family}`;
       ctx.fillStyle = Tools.text.options.color;
