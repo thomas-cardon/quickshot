@@ -7,6 +7,7 @@
     "start": "electron . --dev",
     "build": "electron-builder --win",
     "ship": "electron-builder --win --ia32 --x64 -p always",
+    "minify-and-build": "node build/build.js",
     "rebuild": "./node_modules/.bin/electron-rebuild",
     "postinstall": "electron-builder install-app-deps"
   },
@@ -21,7 +22,8 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^8.2.0",
-    "electron-builder": "^22.4.1"
+    "electron-builder": "^22.4.1",
+    "minify": "^5.1.1",
   },
   "dependencies": {
     "a-capsule": "^3.0.0",
