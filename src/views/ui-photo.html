@@ -11,7 +11,8 @@
           <div class="ui icon buttons" style="display: inline-block;">
             <button class="ui button" id="pencil-btn" onclick="Tools.pencil.toggle(this);"><i class="pencil alternate icon"></i></button>
             <button class="ui button" id="text-btn" onclick="Tools.text.toggle(this);"><i class="font icon"></i></button>
-            <button class="ui button" onclick="Tools.arrow.toggle(this)"><i class="long arrow alternate up icon"></i></button>
+            <button class="ui button" id="arrow-btn" onclick="Tools.arrow.toggle(this)"><i class="long arrow alternate up icon"></i></button>
+            <button class="ui button" id="blur-btn" onclick="Tools.blur.toggle(this)"><i class="low vision icon"></i></button>
             <button class="ui button" onclick="Tools.crop(this);"><i class="crop icon"></i></button>
           </div>
 
@@ -23,6 +24,7 @@
           <div class="ui icon buttons" style="display: inline-block;">
             <button class="ui button" onclick="save('clipboard');"><i class="copy icon"></i></button>
             <button class="ui button" onclick="save(require('electron').shell.showItemInFolder(require('electron').remote.dialog.showSaveDialog({ title: 'Save the screenshot', defaultPath: 'screenshot.png' })));"><i class="save icon"></i></button>
+            <button class="ui button" onclick="this.disabled = true;imgur(this);"><i class="cloud upload icon"></i></button>
           </div>
         </div>
         <div id="text-tools" style="position: absolute; display: none; top: 0; left: 0; z-index: 1000;">
@@ -54,6 +56,7 @@
         <script src="../assets/canvas-arrow.js"></script>
         <script src="../controllers/cropper-photo.js"></script>
         <script src="../controllers/tools.js"></script>
+        <script src="../controllers/upload-to-imgur.js"></script>
         <script>
           document.getElementById('container').style.width = window.screen.width + 'px';
           document.getElementById('container').style.height = window.screen.height + 'px';
@@ -64,6 +67,9 @@
             else if (e.which === 27) {
               Region.cancel(true);
               require('electron').remote.getCurrentWindow().hide();
+            }
+            else if (e.which === 13) {
+              Tools.crop();
             }
           });
         </script>

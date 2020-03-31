@@ -28,7 +28,8 @@
   "dependencies": {
     "a-capsule": "^3.0.0",
     "electron-updater": "^4.2.5",
-    "sharp": "^0.25.2"
+    "sharp": "^0.25.2",
+    "stackblur-canvas": "^2.2.0"
   },
   "repository": "https://github.com/Ryzzzen/quickshot",
   "build": {

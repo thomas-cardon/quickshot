@@ -1,5 +1,5 @@
 global.UIEnabled = true;
-
+const StackBlur = require('stackblur-canvas');
 function take() {
   console.dir(Store);
   fullscreenScreenshot('image/' + Store["photo-extension"]).then(canvas => select(canvas, 'image/' + Store["photo-extension"], UIEnabled, true));
@@ -7,6 +7,13 @@ function take() {
 
 const Tools = {
   drag: true,
+  selectedTool: 'pencil',
+  disableLastTool: () => {
+    if (!Tools.selectedTool) return;
+
+    Tools[Tools.selectedTool].toggle(document.getElementById(Tools.selectedTool + '-btn'), false);
+    selectedTool = null;
+  },
   show: () => {
     document.getElementById('tools').style.top = (leftY - 50) + 'px';
     document.getElementById('tools').style.left = leftX + 'px';
@@ -29,14 +36,7 @@ const Tools = {
     document.getElementById('text-tools').style.display = 'none';
     document.getElementById('text-form').style.display = 'none';
 
-    if (Tools.pencil.enabled)
-      Tools.pencil.toggle();
-
-    if (Tools.text.enabled)
-      Tools.text.toggle();
-
-    if (Tools.arrow.enabled)
-      Tools.arrow.toggle();
+    Tools.disableLastTool();
   },
   inBounds: function(x, y) {
     console.log(x, y);
@@ -49,7 +49,7 @@ const Tools = {
     Region.cancel(false);
     Tools.hide();
 
-    fullscreenScreenshot('image/png').then(canvas => select(canvas, 'image/png', true));
+    select(canvas, 'image/' + Store["photo-extension"], true);
   },
   _cPushArray: [],
   _cStep: -1,
@@ -59,7 +59,7 @@ const Tools = {
     Tools._cPushArray.push(canvas.toDataURL());
   },
   undo: () => {
-    if (Tools._cStep === 0) return;
+    if (Tools._cStep <= 0) return Tools._cStep = 0;
     Tools._cStep--;
     var canvasPic = new Image();
     canvasPic.src = Tools._cPushArray[Tools._cStep];
@@ -74,22 +74,17 @@ const Tools = {
     }
   },
   arrow: {
-    enabled: false,
-    toggle: function(el) {
-      this.disabled = !Tools.arrow.enabled;
+    toggle: function(el, toggle = !el.disabled) {
+      el.classList[toggle ? 'add' : 'remove']('active');
 
-      if (Tools.pencil.enabled)
-        document.getElementById('pencil-btn').click();
-
-      if (!Tools.arrow.enabled) {
-        Tools.arrow.enabled = true;
+      if (toggle) {
+        Tools.disableLastTool();
+        Tools.selectedTool = 'arrow';
 
         document.addEventListener('mousedown', Tools.arrow.onMouseDownEvent);
         document.addEventListener('mouseup', Tools.arrow.onMouseUpEvent);
       }
       else {
-        Tools.arrow.enabled = false;
-
         document.removeEventListener('mousedown', Tools.arrow.onMouseDownEvent);
         document.removeEventListener('mouseup', Tools.arrow.onMouseUpEvent);
       }
@@ -103,7 +98,7 @@ const Tools = {
       ctx.arrow(Tools.arrow.ox, Tools.arrow.oy, e.clientX, e.clientY, [0, 1, -10, 1, -10, 5]);
       ctx.fill();
 
-      Tools.arrow.toggle();
+      Tools.disableLastTool();
     },
     onMouseDownEvent: (e) => {
       if (!Tools.inBounds(Tools.arrow.ox, Tools.arrow.oy)) return console.log('Out of bounds error!');
@@ -113,26 +108,79 @@ const Tools = {
       Tools._cPush();
     }
   },
+  blur: {
+    toggle: function(el, toggle = !el.disabled) {
+      el.classList[toggle ? 'add' : 'remove']('active');
+
+      if (toggle) {
+        Tools.disableLastTool();
+        Tools.selectedTool = 'blur';
+
+        Tools.blur.div = document.createElement('div');
+        Tools.blur.div.style.position = 'absolute';
+        Tools.blur.div.style.border = '3px dotted #000';
+        Tools.blur.div.style['z-index'] = '2000';
+
+        document.body.append(Tools.blur.div);
+
+        document.body.addEventListener('mousedown', Tools.blur.onMouseDownEvent);
+        document.body.addEventListener('mousemove', Tools.blur.onMouseMoveEvent);
+      }
+      else {
+        document.body.removeEventListener('mousedown', Tools.blur.onMouseDownEvent);
+        document.body.removeEventListener('mousemove', Tools.blur.onMouseMoveEvent);
+      }
+    },
+    onMouseMoveEvent: (e) => {
+      if (e.button !== 1) {
+        Tools.blur.div.style.display = 'none';
+
+        Tools._cPush();
+        StackBlur.canvasRGBA(canvas, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2, 25);
+
+        return Tools.disableLastTool();
+      }
+
+      let div = Tools.blur.div;
+
+      Tools.blur.x2 = e.clientX;
+      Tools.blur.y2 = e.clientY;
+
+      Tools.blur.recalculate(div, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2);
+    },
+    onMouseDownEvent: (e) => {
+      let div = Tools.blur.div;
+      div.style.display = 'block';
+
+      Tools.blur.x1 = e.clientX;
+      Tools.blur.y1 = e.clientY;
+
+      Tools.blur.recalculate(div, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2);
+    },
+    recalculate: (div, x1, x2, y1, y2) => {
+      var x3 = Math.min(x1,x2); //Smaller X
+      var x4 = Math.max(x1,x2); //Larger X
+      var y3 = Math.min(y1,y2); //Smaller Y
+      var y4 = Math.max(y1,y2); //Larger Y
+      div.style.left = x3 + 'px';
+      div.style.top = y3 + 'px';
+      div.style.width = x4 - x3 + 'px';
+      div.style.height = y4 - y3 + 'px';
+    }
+  },
   pencil: {
-    enabled: false,
-    toggle: function(el) {
-      this.disabled = !Tools.pencil.enabled;
+    toggle: function(el, toggle = !el.disabled) {
+      el.classList[toggle ? 'add' : 'remove']('active');
 
-      if (Tools.text.enabled)
-        document.getElementById('text-btn').click();
-
-      if (!Tools.pencil.enabled) {
-        Tools.pencil.enabled = true;
-        el.classList.add('active');
+      if (toggle) {
+        Tools.disableLastTool();
+        Tools.selectedTool = 'pencil';
 
         document.addEventListener('mousedown', Tools.pencil.onMouseDownEvent);
         document.addEventListener('mouseenter', Tools.pencil.setPosition);
         document.addEventListener('mousemove', Tools.pencil.onMouseMoveEvent);
       }
       else {
-        Tools.pencil.enabled = false;
-        el.classList.remove('active');
-
         document.removeEventListener('mousedown', Tools.pencil.onMouseDownEvent);
         document.removeEventListener('mouseenter', Tools.pencil.setPosition);
         document.removeEventListener('mousemove', Tools.pencil.onMouseMoveEvent);
@@ -165,23 +213,18 @@ const Tools = {
     }
   },
   text: {
-    enabled: false,
     options: { style: 'normal', variant: 'normal', weight: 'normal', size: '30px', family: 'arial', color: 'black' },
-    toggle: function(el) {
-      if (Tools.pencil.enabled)
-        document.getElementById('pencil-btn').click();
+    toggle: function(el, toggle = !el.disabled) {
+      el.classList[toggle ? 'add' : 'remove']('active');
 
-      if (!Tools.text.enabled) {
-        Tools.text.enabled = true;
-        el.classList.add('active');
+      if (toggle) {
+        Tools.disableLastTool();
+        Tools.selectedTool = 'text';
 
         document.querySelectorAll('.text-options').forEach(x => x.style.display = 'block');
         document.addEventListener('mousedown', Tools.text.onMouseDownEvent);
       }
       else {
-        Tools.text.enabled = false;
-        el.classList.remove('active');
-
         document.querySelectorAll('.text-options').forEach(x => x.style.display = 'none');
         document.removeEventListener('mousedown', Tools.text.onMouseDownEvent);
       }
