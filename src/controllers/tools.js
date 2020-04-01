@@ -124,22 +124,40 @@ const Tools = {
         document.body.append(Tools.blur.div);
 
         document.body.addEventListener('mousedown', Tools.blur.onMouseDownEvent);
+        document.body.addEventListener('mouseup', Tools.blur.onMouseUpEvent);
         document.body.addEventListener('mousemove', Tools.blur.onMouseMoveEvent);
       }
       else {
         document.body.removeEventListener('mousedown', Tools.blur.onMouseDownEvent);
+        document.body.removeEventListener('mouseup', Tools.blur.onMouseUpEvent);
         document.body.removeEventListener('mousemove', Tools.blur.onMouseMoveEvent);
       }
     },
-    onMouseMoveEvent: (e) => {
-      if (e.button !== 1) {
-        Tools.blur.div.style.display = 'none';
+    onMouseUpEvent: (e) => {
+      if (!Tools.inBounds(Tools.blur.x2, Tools.blur.y2)) return console.log('Out of bounds error!');
+      console.log('Blur >> Stopped');
 
-        Tools._cPush();
-        StackBlur.canvasRGBA(canvas, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2, 25);
+      Tools.blur.isDown = false;
+      Tools.blur.div.style.display = 'none';
 
-        return Tools.disableLastTool();
+      Tools._cPush();
+
+      try {
+        let x = parseInt(Tools.blur.div.style.left.slice(0, -2)), w = parseInt(Tools.blur.div.style.width.slice(0, -2));
+        let y = parseInt(Tools.blur.div.style.top.slice(0, -2)), h = parseInt(Tools.blur.div.style.height.slice(0, -2));
+
+        console.log('Blur >> Enabling at X:', x, 'Y:', y, 'Width:', w, 'Height:', h, 'Radius:', 15);
+        StackBlur.canvasRGBA(canvas, x, y, w, h, 15);
+        Tools.blur.div.remove();
       }
+      catch(err) {
+        console.error(err);
+      }
+
+      return Tools.disableLastTool();
+    },
+    onMouseMoveEvent: (e) => {
+      if (!Tools.blur.isDown) return;
 
       let div = Tools.blur.div;
 
@@ -149,6 +167,9 @@ const Tools = {
       Tools.blur.recalculate(div, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2);
     },
     onMouseDownEvent: (e) => {
+      if (!Tools.inBounds(Tools.blur.x1, Tools.blur.y1)) return console.log('Out of bounds error!');
+      Tools.blur.isDown = true;
+
       let div = Tools.blur.div;
       div.style.display = 'block';
 
@@ -162,6 +183,7 @@ const Tools = {
       var x4 = Math.max(x1,x2); //Larger X
       var y3 = Math.min(y1,y2); //Smaller Y
       var y4 = Math.max(y1,y2); //Larger Y
+
       div.style.left = x3 + 'px';
       div.style.top = y3 + 'px';
       div.style.width = x4 - x3 + 'px';
@@ -201,7 +223,6 @@ const Tools = {
       ctx.lineTo(Tools.pencil.x, Tools.pencil.y); // to
 
       ctx.stroke(); // draw it!
-
     },
     onMouseDownEvent: (e) => {
       Tools._cPush();
