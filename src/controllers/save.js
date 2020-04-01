@@ -37,7 +37,7 @@ function onMouseDownEvent(e) {
   document.getElementById('mouseElement').style.left = leftX + 'px';
   document.getElementById('mouseElement').style.top = leftY + 'px';
 
-  console.log('Dragging mouse from X coords: ' + leftX + ', Y coords: ' + leftY);
+  console.log('Region >> Dragging mouse from X coords: ' + leftX + ', Y coords: ' + leftY);
 }
 
 function onMouseMoveEvent(e) {
@@ -46,7 +46,7 @@ function onMouseMoveEvent(e) {
   rightX = e.clientX;
   rightY = e.clientY;
 
-  console.log('Moving to coords: ' + rightX + ', Y coords: ' + rightY);
+  console.log('Region >> Moving to coords: ' + rightX + ', Y coords: ' + rightY);
 
   document.getElementById('mouseElement').style.width = (rightX - leftX) + 'px';
   document.getElementById('mouseElement').style.height = (rightY - leftY) + 'px';
@@ -55,7 +55,7 @@ function onMouseMoveEvent(e) {
 function onMouseUpEvent(e) {
   isDown = false;
 
-  console.log('Stopped to coords: ' + rightX + ', Y coords: ' + rightY);
+  console.log('Region >> Stopped to coords: ' + rightX + ', Y coords: ' + rightY);
 
   global.options = { left: leftX, top: leftY, width: rightX - leftX, height: rightY - leftY };
   if (options.width <= 0 || options.height <= 0)
