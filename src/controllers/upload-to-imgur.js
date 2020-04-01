@@ -3,7 +3,7 @@ async function imgur(el) {
     require('electron').remote.getCurrentWindow().hide();
     new Notification('Quickshot', {
       body: 'Téléversement sur Imgur'
-    })
+    });
 
     let buffer = await require('../controllers/extract-photo')(canvas.toDataURL('image/' + Store["photo-extension"]), options, 'buffer');
 

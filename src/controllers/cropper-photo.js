@@ -38,7 +38,7 @@ function fullscreenScreenshot(imageFormat) {
             canvas.style.top = '0px';
             canvas.style.left = '0px';
 
-            canvas.style.filter = 'brightness(30%)';
+            canvas.style.filter = 'brightness(.3)';
 
             let ctx = canvas.getContext('2d');
 

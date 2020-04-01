@@ -40,6 +40,12 @@
               <label>Compression</label>
               <input type="number" min="0" max="10" id="photo-compression" data-settings-id="">
             </div>
+            <div class="field">
+              <div class="ui checkbox">
+                <input type="checkbox" id="auto-launch">
+                <label>Activer le démarrage au lancement de Windows</label>
+              </div>
+            </div>
             <p class="align">0 vaut l'image la moins compressée, et 10 vaut l'inverse</p>
           </div>
         </div>
@@ -57,6 +63,21 @@
         const { FileStorage } = require('a-capsule');
         let Storage = new FileStorage('settings.json');
 
+        const AutoLaunch = require('auto-launch');
+        let launch = new AutoLaunch({
+            name: 'Quickshot'
+        }), launchCheckbox = document.getElementById('auto-launch');
+
+        launchCheckbox.addEventListener('change', function() {
+          launch[this.checked ? 'disable' : 'enable']().then(() => {
+            new Notification('Quickshot', {
+              body: 'Démarrage automatique désactivé'
+            });
+            this.disabled = false;
+          }).catch(console.error)
+        });
+
+        launch.isEnabled().then(x => launchCheckbox.checked = x);
         Storage.load().then(() => loadSettings());
 
         function loadSettings() {

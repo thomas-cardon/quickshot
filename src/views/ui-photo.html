@@ -47,12 +47,12 @@
         </div>
         <div id="text-form" class="tools text-options">
           <div class="ui labeled input">
-            <div class="ui label bg-inverted" onload="this.disabled = !require('electron').remote.app.showEmojiPanel || !require('electron').remote.app.isEmojiPanelSupported()" onclick="document.getElementById('text').focus();require('electron').remote.app.showEmojiPanel();">😎</div>
+            <div class="ui label" onload="this.disabled = !require('electron').remote.app.showEmojiPanel || !require('electron').remote.app.isEmojiPanelSupported()" onclick="document.getElementById('text').focus();require('electron').remote.app.showEmojiPanel();">😎</div>
             <input type="text" id="text" placeholder="Entrez le texte ici">
           </div>
         </div>
         <div id="container">
-          <div id="mouseElement" class="region"></div>
+          <div id="mouseElement" class="region" style="backdrop-filter: brightness(3.7);"></div>
         </div>
         <script src="../assets/canvas-arrow.js"></script>
         <script src="../controllers/cropper-photo.js"></script>

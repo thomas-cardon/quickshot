@@ -1,6 +1,6 @@
 {
   "name": "quickshot",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A screenshot tool",
   "main": "src/main.js",
   "scripts": {
@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "a-capsule": "^3.0.0",
+    "auto-launch": "^5.0.5",
     "electron-updater": "^4.2.5",
     "sharp": "^0.25.2",
     "stackblur-canvas": "^2.2.0"
