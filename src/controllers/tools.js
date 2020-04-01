@@ -19,6 +19,7 @@ const Tools = {
     document.getElementById('tools').style.left = leftX + 'px';
 
     document.getElementById('tools').style.display = 'block';
+    document.getElementById('text').style.width = (rightX - leftX - 44) + 'px';
 
     document.getElementById('text-tools').style.display = 'block';
     document.getElementById('text-form').style.display = 'block';
@@ -39,38 +40,59 @@ const Tools = {
     Tools.disableLastTool();
   },
   inBounds: function(x, y) {
-    console.log(x, y);
-    if (x < options.left || x >= (options.left + options.width)) return false;
-    if (y < options.top  || y >= (options.top + options.height)) return false;
+    if (x < Region.coordinates.left || x >= Region.coordinates.right) return false;
+    if (y < Region.coordinates.top || y >= Region.coordinates.bottom) return false;
 
     return true;
   },
+  getMaximumInBoundsCoordinates(x, y) {
+    if (x < Region.coordinates.left)
+      x = Region.coordinates.left + 1;
+    else if (x >= Region.coordinates.right)
+      x = Region.coordinates.right - 1;
+
+    if (y < Region.coordinates.top)
+      y = Region.coordinates.top + 1;
+    else if (y >= Region.coordinates.bottom)
+      y = Region.coordinates.bottom - 1;
+
+    return { x, y };
+  },
   crop: () => {
     Region.cancel(false);
+    Tools.undoredo.reset();
     Tools.hide();
 
     select(canvas, 'image/' + Store["photo-extension"], true);
   },
-  _cPushArray: [],
-  _cStep: -1,
-  _cPush: () => {
-    Tools._cStep++;
-    if (Tools._cStep < Tools._cPushArray.length) { Tools._cPushArray.length = Tools._cStep; }
-    Tools._cPushArray.push(canvas.toDataURL());
-  },
-  undo: () => {
-    if (Tools._cStep <= 0) return Tools._cStep = 0;
-    Tools._cStep--;
-    var canvasPic = new Image();
-    canvasPic.src = Tools._cPushArray[Tools._cStep];
-    canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
-  },
-  redo: () => {
-    if (Tools._cStep < Tools._cPushArray.length - 1) {
-        Tools._cStep++;
-        var canvasPic = new Image();
-        canvasPic.src = Tools._cPushArray[Tools._cStep];
-        canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
+  undoredo: {
+    _cPushArray: [],
+    _cStep: -1,
+    _cPush: () => {
+      Tools.undoredo._cStep++;
+      if (Tools.undoredo._cStep < Tools.undoredo._cPushArray.length) { Tools.undoredo._cPushArray.length = Tools.undoredo._cStep; }
+      Tools.undoredo._cPushArray.push(canvas.toDataURL());
+    },
+    undo: () => {
+      if (Tools.undoredo._cStep <= 0) return Tools.undoredo._cStep = 0;
+      Tools.undoredo._cStep--;
+      var canvasPic = new Image();
+      canvasPic.src = Tools.undoredo._cPushArray[Tools.undoredo._cStep];
+      canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
+    },
+    redo: () => {
+      if (Tools.undoredo._cStep < Tools.undoredo._cPushArray.length - 1) {
+          Tools.undoredo._cStep++;
+          var canvasPic = new Image();
+          canvasPic.src = Tools.undoredo._cPushArray[Tools.undoredo._cStep];
+          canvasPic.onload = function () { ctx.drawImage(canvasPic, 0, 0); };
+      }
+    },
+    reset: () => {
+      Tools.undoredo._cStep = 1;
+      Tools.undoredo._cPushArray[Tools.undoredo._cPushArray[0]];
+
+      Tools.undoredo.undo();
     }
   },
   arrow: {
@@ -92,8 +114,6 @@ const Tools = {
     onMouseUpEvent: (e) => {
       if (!Tools.inBounds(e.clientX, e.clientY)) return console.log('Out of bounds error!');
 
-      console.dir(e);
-
       ctx.beginPath();
       ctx.arrow(Tools.arrow.ox, Tools.arrow.oy, e.clientX, e.clientY, [0, 1, -10, 1, -10, 5]);
       ctx.fill();
@@ -105,10 +125,16 @@ const Tools = {
 
       Tools.arrow.ox = e.clientX;
       Tools.arrow.oy = e.clientY;
-      Tools._cPush();
+      Tools.undoredo._cPush();
     }
   },
   blur: {
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 0,
+    w: 0,
+    h: 0,
     toggle: function(el, toggle = !el.disabled) {
       el.classList[toggle ? 'add' : 'remove']('active');
 
@@ -134,49 +160,41 @@ const Tools = {
       }
     },
     onMouseUpEvent: (e) => {
-      if (!Tools.inBounds(Tools.blur.x2, Tools.blur.y2)) return console.log('Out of bounds error!');
       console.log('Blur >> Stopped');
-
       Tools.blur.isDown = false;
-      Tools.blur.div.style.display = 'none';
 
-      Tools._cPush();
+      Tools.blur.div.remove();
+      Tools.undoredo._cPush();
 
       try {
-        let x = parseInt(Tools.blur.div.style.left.slice(0, -2)), w = parseInt(Tools.blur.div.style.width.slice(0, -2));
-        let y = parseInt(Tools.blur.div.style.top.slice(0, -2)), h = parseInt(Tools.blur.div.style.height.slice(0, -2));
-
-        console.log('Blur >> Enabling at X:', x, 'Y:', y, 'Width:', w, 'Height:', h, 'Radius:', 15);
-        StackBlur.canvasRGBA(canvas, x, y, w, h, 15);
-        Tools.blur.div.remove();
+        console.log(`Blur >> Enabling at X: ${Tools.blur.x} Y: ${Tools.blur.y} Width: ${Tools.blur.w} Height: ${Tools.blur.h} Radius: 15`);
+        StackBlur.canvasRGBA(canvas, Tools.blur.x, Tools.blur.y, Tools.blur.w, Tools.blur.h, 15);
       }
       catch(err) {
         console.error(err);
       }
 
-      return Tools.disableLastTool();
+      Tools.disableLastTool();
     },
     onMouseMoveEvent: (e) => {
       if (!Tools.blur.isDown) return;
+      let sizeCoords = Tools.getMaximumInBoundsCoordinates(e.screenX, e.screenY);
 
-      let div = Tools.blur.div;
+      Tools.blur.x2 = sizeCoords.x;
+      Tools.blur.y2 = sizeCoords.y;
 
-      Tools.blur.x2 = e.clientX;
-      Tools.blur.y2 = e.clientY;
-
-      Tools.blur.recalculate(div, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2);
+      Tools.blur.recalculate(Tools.blur.div, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2);
     },
     onMouseDownEvent: (e) => {
-      if (!Tools.inBounds(Tools.blur.x1, Tools.blur.y1)) return console.log('Out of bounds error!');
+      let sizeCoords = Tools.getMaximumInBoundsCoordinates(e.screenX, e.screenY);
+
       Tools.blur.isDown = true;
 
-      let div = Tools.blur.div;
-      div.style.display = 'block';
+      Tools.blur.x1 = sizeCoords.x;
+      Tools.blur.y1 = sizeCoords.y;
 
-      Tools.blur.x1 = e.clientX;
-      Tools.blur.y1 = e.clientY;
-
-      Tools.blur.recalculate(div, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2);
+      Tools.blur.recalculate(Tools.blur.div, Tools.blur.x1, Tools.blur.x2, Tools.blur.y1, Tools.blur.y2);
+      Tools.blur.div.style.display = 'block';
     },
     recalculate: (div, x1, x2, y1, y2) => {
       var x3 = Math.min(x1,x2); //Smaller X
@@ -184,10 +202,10 @@ const Tools = {
       var y3 = Math.min(y1,y2); //Smaller Y
       var y4 = Math.max(y1,y2); //Larger Y
 
-      div.style.left = x3 + 'px';
-      div.style.top = y3 + 'px';
-      div.style.width = x4 - x3 + 'px';
-      div.style.height = y4 - y3 + 'px';
+      div.style.left = (Tools.blur.x = x3) + 'px';
+      div.style.top = (Tools.blur.y = y3) + 'px';
+      div.style.width = (Tools.blur.w = x4 - x3) + 'px';
+      div.style.height = (Tools.blur.h = y4 - y3) + 'px';
     }
   },
   pencil: {
@@ -225,7 +243,7 @@ const Tools = {
       ctx.stroke(); // draw it!
     },
     onMouseDownEvent: (e) => {
-      Tools._cPush();
+      Tools.undoredo._cPush();
       Tools.pencil.setPosition(e);
     },
     setPosition: (e) => {
@@ -252,7 +270,7 @@ const Tools = {
     },
     onMouseDownEvent: function(e) {
       if (!Tools.inBounds(e.clientX, e.clientY)) return console.log('Out of bounds error!');
-      Tools._cPush();
+      Tools.undoredo._cPush();
 
       ctx.font = `${Tools.text.options.style} ${Tools.text.options.variant} ${Tools.text.options.weight} ${Tools.text.options.size} ${Tools.text.options.family}`;
       ctx.fillStyle = Tools.text.options.color;
