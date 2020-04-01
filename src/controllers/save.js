@@ -1,23 +1,25 @@
 let leftX, leftY, rightX, rightY, isDown;
 
 const Region = {
-  cancel: function(full) {
-    if (full) {
+  cancel: function(resetCanvas) {
+    if (resetCanvas) {
       try {
         canvas.remove();
 
         delete global.ctx;
         delete global.canvas;
       }
-      catch(err) {}
+      catch(err) {
+        console.error(err);
+      }
 
       document.body.style.display = 'none';
     }
 
     Tools.hide();
 
-    Tools._cPushArray = [];
-    Tools._cStep = -1;
+    Tools.undoredo._cPushArray = [];
+    Tools.undoredo._cStep = -1;
 
     document.getElementById('mouseElement').display = 'none';
 
@@ -67,6 +69,8 @@ function onMouseUpEvent(e) {
   document.removeEventListener('mousedown', onMouseDownEvent);
   document.removeEventListener('mousemove', onMouseMoveEvent);
   document.removeEventListener('mouseup', onMouseUpEvent);
+
+  Region.coordinates = document.getElementById('mouseElement').getBoundingClientRect();
 }
 
 function select(canvas, imageFormat, tools, firstTime) {

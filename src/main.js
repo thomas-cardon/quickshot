@@ -51,11 +51,14 @@ function createScreenshotWindow(width, height, page = 'photo') {
   takeScreenshotWindow.loadFile(path.join(__dirname, '/views/', 'ui-' + mode + '.html'));
   takeScreenshotWindow.webContents.executeJavaScript("global.Store = " + JSON.stringify(Storage._store) + "; global.UIEnabled = " + (page === 'photo' ? 'true;' : 'false;'));
 
-  takeScreenshotWindow.once('ready-to-show', () => takeScreenshotWindow.show());
+  takeScreenshotWindow.once('ready-to-show', () => {
+    console.log('>> Capturing source');
+    takeScreenshotWindow.webContents.executeJavaScript("take();", true);
+    takeScreenshotWindow.show();
+  });
 
   takeScreenshotWindow.on('show', () => {
-    console.log('>> Screenshot window is now shown. Capturing source');
-    takeScreenshotWindow.webContents.executeJavaScript("take();", true);
+    console.log('>> Screenshot window is now shown.');
   });
 }
 
@@ -118,7 +121,10 @@ app.on('ready', () => {
         createScreenshotWindow(width, height, 'photo');
       }
       else if (!takeScreenshotWindow || takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height, 'photo');
-      else takeScreenshotWindow.show();
+      else {
+        takeScreenshotWindow.webContents.executeJavaScript("take();", true);
+        takeScreenshotWindow.show();
+      }
     });
 
     globalShortcut.register(Storage.get('shortcut-instant'), F.instant = () => {
@@ -130,7 +136,10 @@ app.on('ready', () => {
         createScreenshotWindow(width, height, 'instant');
       }
       else if (!takeScreenshotWindow || takeScreenshotWindow.isDestroyed()) createScreenshotWindow(width, height, 'instant');
-      else takeScreenshotWindow.show();
+      else {
+        takeScreenshotWindow.webContents.executeJavaScript("take();", true);
+        takeScreenshotWindow.show();
+      }
     });
 
     globalShortcut.register(Storage.get('shortcut-settings'), F.settings = () => {
