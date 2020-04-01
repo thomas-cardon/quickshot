@@ -1,0 +1,3 @@
+*:not(input[type='text']) {
+  user-select: none;
+}
