@@ -1,3 +1,31 @@
 *:not(input[type='text']) {
   user-select: none;
 }
+
+.region {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+
+  overflow: hidden;
+  outline: aquamarine dashed 2px;
+}
+
+.tools {
+  position: absolute;
+  display: none;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.tools-horizontal > div {
+  display: inline-block;
+}
+
+.tools-vertical > div {
+  display: inline-block;
+  margin-bottom: 4px !important;
+}

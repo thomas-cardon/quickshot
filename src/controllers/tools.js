@@ -21,7 +21,7 @@ const Tools = {
     document.getElementById('tools').style.display = 'block';
     document.getElementById('text').style.width = (rightX - leftX - 44) + 'px';
 
-    document.getElementById('text-tools').style.display = 'block';
+    document.getElementById('text-tools').style.display = 'grid';
     document.getElementById('text-form').style.display = 'block';
 
     document.getElementById('text-tools').style.top = leftY + 'px';
@@ -113,19 +113,17 @@ const Tools = {
     },
     onMouseUpEvent: (e) => {
       if (!Tools.inBounds(e.clientX, e.clientY)) return console.log('Out of bounds error!');
+      Tools.undoredo._cPush();
 
       ctx.beginPath();
       ctx.arrow(Tools.arrow.ox, Tools.arrow.oy, e.clientX, e.clientY, [0, 1, -10, 1, -10, 5]);
       ctx.fill();
-
-      Tools.disableLastTool();
     },
     onMouseDownEvent: (e) => {
-      if (!Tools.inBounds(Tools.arrow.ox, Tools.arrow.oy)) return console.log('Out of bounds error!');
+      let coords = Tools.getMaximumInBoundsCoordinates(e.screenX, e.screenY);
 
-      Tools.arrow.ox = e.clientX;
-      Tools.arrow.oy = e.clientY;
-      Tools.undoredo._cPush();
+      Tools.arrow.ox = coords.x;
+      Tools.arrow.oy = coords.y;
     }
   },
   blur: {
@@ -143,8 +141,9 @@ const Tools = {
         Tools.selectedTool = 'blur';
 
         Tools.blur.div = document.createElement('div');
-        Tools.blur.div.style.position = 'absolute';
-        Tools.blur.div.style.border = '3px dotted #000';
+
+        Tools.blur.div.classList.add('region');
+        Tools.blur.div.style.display = 'none';
         Tools.blur.div.style['z-index'] = '2000';
 
         document.body.append(Tools.blur.div);
@@ -173,8 +172,6 @@ const Tools = {
       catch(err) {
         console.error(err);
       }
-
-      Tools.disableLastTool();
     },
     onMouseMoveEvent: (e) => {
       if (!Tools.blur.isDown) return;
@@ -247,8 +244,10 @@ const Tools = {
       Tools.pencil.setPosition(e);
     },
     setPosition: (e) => {
-      Tools.pencil.x = e.clientX;
-      Tools.pencil.y = e.clientY;
+      let coords = Tools.getMaximumInBoundsCoordinates(e.screenX, e.screenY);
+
+      Tools.pencil.x = coords.x;
+      Tools.pencil.y = coords.y;
     }
   },
   text: {
