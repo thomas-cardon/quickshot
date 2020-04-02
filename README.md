@@ -2,6 +2,8 @@
 
 ### An attempt at making a good screenshot tool using Electron
 
+![Screenshot #1](./screenshots/1.png)
+
 #### Install
 For now you have to build it. The cropping window (that opens with the PrintScreen key),
 stays on top of other windows. If you start the app using the `--dev` argument, this parameter will be disabled.
@@ -14,9 +16,14 @@ electron  . --dev
 ### What works?
 Press the PrintScreen key, crop a region of the screen using your mouse, and then use your tool to edit the photo. Once it's done, press Control-V anywhere (for example in Discord or Paint), and you'll have it!
 
+- Press PrintScreen to take and edit a screenshot
+- Press Shift+PrintScreen to take a screenshot (faster)
+- Press Ctrl/Cmd+PrintScreen to open the settings
+
 #### Goals
 - Quick loading time
   > For now the window that opens with the PrintScreen key loads fast, but I think I could do better. Maybe if we load one file instead of separating every module.
+- More shortcuts
 - Export anywhere
   > Support for Google Drive, iCloud, Discord?
 - Support for videos/gif
